@@ -5,20 +5,23 @@
 //  Created by Gabriel Castro on 09/06/2026.
 //
 
+// Path: TaskManager/ContentView.swift
 import SwiftUI
 
 struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
-}
+    @State private var authViewModel = AuthViewModel()
 
-#Preview {
-    ContentView()
+    var body: some View {
+        Group {
+            switch authViewModel.state {
+            case .initial, .loading:
+                ProgressView()
+            case .authenticated:
+                HomeView()
+            case .unauthenticated, .error:
+                LoginView()
+            }
+        }
+        .environment(authViewModel)
+    }
 }
