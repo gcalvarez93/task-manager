@@ -12,7 +12,7 @@ struct HomeView: View {
     var body: some View {
         TabView {
             Tab(String(localized: "nav_boards"), systemImage: "square.grid.2x2") {
-                Text("Boards")
+                BoardsView()
             }
             Tab(String(localized: "nav_profile"), systemImage: "person") {
                 Text("Profile")

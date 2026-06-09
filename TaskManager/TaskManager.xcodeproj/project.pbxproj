@@ -17,9 +17,22 @@
 		B6B08F472FD88D0A00A797B3 /* TaskManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TaskManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B6B090122FD8AC8800A797B3 /* Exceptions for "TaskManager" folder in "TaskManager" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = B6B08F462FD88D0A00A797B3 /* TaskManager */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B6B08F492FD88D0A00A797B3 /* TaskManager */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B6B090122FD8AC8800A797B3 /* Exceptions for "TaskManager" folder in "TaskManager" target */,
+			);
 			path = TaskManager;
 			sourceTree = "<group>";
 		};
@@ -278,6 +291,7 @@
 				DEVELOPMENT_TEAM = BWT3NJX9MX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TaskManager/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -310,6 +324,7 @@
 				DEVELOPMENT_TEAM = BWT3NJX9MX;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TaskManager/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
