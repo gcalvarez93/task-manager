@@ -1,6 +1,6 @@
 # Task Manager
 
-A board-based task management app built as part of the [CastroDev](https://castrodev.com) portfolio. Organise your work into custom boards, track tasks by priority and status, and stay on top of everything — with full dark mode support.
+A board-based task management app. Organise your work into custom boards, track tasks by priority and status, and stay on top of everything — with full dark mode support.
 
 ---
 
