@@ -7,14 +7,14 @@ A board-based task management app built as part of the [CastroDev](https://castr
 ## 📱 Screenshots
 
 <p align="center">
-  <img src="ScreenShots/login_light.png" width="23%" />
-  <img src="ScreenShots/boards_light.png" width="23%" />
-  <img src="ScreenShots/tasks_light.png" width="23%" />
-  <img src="ScreenShots/profile_dark.png" width="23%" />
+  <img src="TaskManager/ScreenShots/login_light.png" width="23%" />
+  <img src="TaskManager/ScreenShots/boards_light.png" width="23%" />
+  <img src="TaskManager/ScreenShots/tasks_light.png" width="23%" />
+  <img src="TaskManager/ScreenShots/profile_dark.png" width="23%" />
 </p>
 <p align="center">
-  <img src="ScreenShots/boards_dark.png" width="23%" />
-  <img src="ScreenShots/tasks_dark.png" width="23%" />
+  <img src="TaskManager/ScreenShots/boards_dark.png" width="23%" />
+  <img src="TaskManager/ScreenShots/tasks_dark.png" width="23%" />
 </p>
 
 ---
