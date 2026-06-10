@@ -36,6 +36,11 @@
 			path = TaskManager;
 			sourceTree = "<group>";
 		};
+		B6B0904A2FD98B4D00A797B3 /* ScreenShots */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ScreenShots;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +61,7 @@
 		B6B08F3E2FD88D0A00A797B3 = {
 			isa = PBXGroup;
 			children = (
+				B6B0904A2FD98B4D00A797B3 /* ScreenShots */,
 				B6B08F492FD88D0A00A797B3 /* TaskManager */,
 				B6B08F482FD88D0A00A797B3 /* Products */,
 			);
@@ -86,6 +92,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				B6B08F492FD88D0A00A797B3 /* TaskManager */,
+				B6B0904A2FD98B4D00A797B3 /* ScreenShots */,
 			);
 			name = TaskManager;
 			packageProductDependencies = (
