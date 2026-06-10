@@ -15,7 +15,7 @@ struct HomeView: View {
                 BoardsView()
             }
             Tab(String(localized: "nav_profile"), systemImage: "person") {
-                Text("Profile")
+                ProfileView()
             }
         }
     }
