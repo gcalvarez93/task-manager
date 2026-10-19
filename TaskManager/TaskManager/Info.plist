@@ -6,7 +6,7 @@
 	<string>https://api.castrodev.com</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
+		<key>Allow Local Networking</key>
 		<true/>
 	</dict>
 </dict>

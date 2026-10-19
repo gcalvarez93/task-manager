@@ -39,11 +39,16 @@ final class ProfileViewModel {
             let profile = try await getProfile.execute()
             state = .loaded(profile)
         } catch {
+            AppLogger.error("ProfileViewModel.loadProfile", error)
             state = .error(error.localizedDescription)
         }
     }
 
-    func update(name: String, language: String, notifications: Bool) async {
+    /// Guarda el perfil en la API. Devuelve `true` si se guardó. Si falla,
+    /// conserva el perfil que ya estaba cargado en lugar de pasar a `.error`,
+    /// para que la pantalla de edición pueda avisar sin perder los datos.
+    @discardableResult
+    func update(name: String, language: String, notifications: Bool) async -> Bool {
         do {
             let profile = try await updateProfile.execute(
                 name: name,
@@ -51,8 +56,10 @@ final class ProfileViewModel {
                 notifications: notifications
             )
             state = .loaded(profile)
+            return true
         } catch {
-            state = .error(error.localizedDescription)
+            AppLogger.error("ProfileViewModel.update", error)
+            return false
         }
     }
 }

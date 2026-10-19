@@ -16,6 +16,7 @@ protocol AuthRemoteDataSourceProtocol {
     func registerWithEmail(email: String, password: String, name: String) async throws -> UserModel
     func loginWithGoogle() async throws -> UserModel
     func logout() async throws
+    func updateDisplayName(_ name: String) async throws -> UserModel?
     func getCurrentUser() -> UserModel?
 }
 
@@ -62,6 +63,17 @@ final class AuthRemoteDataSource: AuthRemoteDataSourceProtocol {
     func logout() async throws {
         try Auth.auth().signOut()
         GIDSignIn.sharedInstance.signOut()
+    }
+
+    /// Actualiza el nombre visible, recarga el usuario y lo devuelve
+    /// (`nil` si no hay sesión).
+    func updateDisplayName(_ name: String) async throws -> UserModel? {
+        guard let user = Auth.auth().currentUser else { return nil }
+        let changeRequest = user.createProfileChangeRequest()
+        changeRequest.displayName = name
+        try await changeRequest.commitChanges()
+        try await user.reload()
+        return mapUser(user)
     }
 
     func getCurrentUser() -> UserModel? {

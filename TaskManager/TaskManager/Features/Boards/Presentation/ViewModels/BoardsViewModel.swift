@@ -45,6 +45,7 @@ final class BoardsViewModel {
             let boards = try await getBoards.execute()
             state = .loaded(boards)
         } catch {
+            AppLogger.error("BoardsViewModel.loadBoards", error)
             state = .error(error.localizedDescription)
         }
     }
@@ -54,6 +55,7 @@ final class BoardsViewModel {
             _ = try await createBoard.execute(name: name, description: description, color: color)
             await loadBoards()
         } catch {
+            AppLogger.error("BoardsViewModel.addBoard", error)
             state = .error(error.localizedDescription)
         }
     }
@@ -63,6 +65,7 @@ final class BoardsViewModel {
             _ = try await updateBoard.execute(id: id, name: name, description: description, color: color)
             await loadBoards()
         } catch {
+            AppLogger.error("BoardsViewModel.editBoard", error)
             state = .error(error.localizedDescription)
         }
     }
@@ -72,6 +75,7 @@ final class BoardsViewModel {
             try await deleteBoard.execute(id: id)
             await loadBoards()
         } catch {
+            AppLogger.error("BoardsViewModel.removeBoard", error)
             state = .error(error.localizedDescription)
         }
     }

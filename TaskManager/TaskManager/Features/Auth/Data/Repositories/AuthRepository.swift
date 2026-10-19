@@ -34,6 +34,13 @@ final class AuthRepository: AuthRepositoryProtocol {
         try await dataSource.logout()
     }
 
+    func updateDisplayName(_ name: String) async throws -> UserEntity {
+        guard let model = try await dataSource.updateDisplayName(name) else {
+            throw Failure.auth("No active session")
+        }
+        return model.toEntity()
+    }
+
     func getCurrentUser() -> UserEntity? {
         dataSource.getCurrentUser()?.toEntity()
     }

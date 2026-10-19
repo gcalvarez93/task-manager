@@ -13,5 +13,6 @@ protocol AuthRepositoryProtocol {
     func registerWithEmail(email: String, password: String, name: String) async throws -> UserEntity
     func loginWithGoogle() async throws -> UserEntity
     func logout() async throws
+    func updateDisplayName(_ name: String) async throws -> UserEntity
     func getCurrentUser() -> UserEntity?
 }

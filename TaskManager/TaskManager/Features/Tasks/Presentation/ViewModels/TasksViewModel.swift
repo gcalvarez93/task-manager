@@ -51,6 +51,7 @@ final class TasksViewModel {
             let tasks = try await getTasks.execute(boardId: board.id)
             state = .loaded(tasks)
         } catch {
+            AppLogger.error("TasksViewModel.loadTasks", error)
             state = .error(error.localizedDescription)
         }
     }
@@ -75,6 +76,7 @@ final class TasksViewModel {
             )
             await loadTasks()
         } catch {
+            AppLogger.error("TasksViewModel.addTask", error)
             state = .error(error.localizedDescription)
         }
     }
@@ -100,6 +102,7 @@ final class TasksViewModel {
             )
             await loadTasks()
         } catch {
+            AppLogger.error("TasksViewModel.editTask", error)
             state = .error(error.localizedDescription)
         }
     }
@@ -109,6 +112,7 @@ final class TasksViewModel {
             try await deleteTask.execute(id: id)
             await loadTasks()
         } catch {
+            AppLogger.error("TasksViewModel.removeTask", error)
             state = .error(error.localizedDescription)
         }
     }

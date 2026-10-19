@@ -7,13 +7,19 @@
 
 // Path: TaskManager/Features/Profile/Presentation/Views/EditProfileView.swift
 import SwiftUI
-import FirebaseAuth
 
 struct EditProfileView: View {
     @Environment(ProfileViewModel.self) private var viewModel
+    @Environment(AuthViewModel.self) private var authViewModel
     @Environment(\.dismiss) private var dismiss
+
     @State private var name = ""
-    @State private var isLoading = false
+    @State private var isSaving = false
+    @State private var showError = false
+
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     var body: some View {
         NavigationStack {
@@ -30,24 +36,15 @@ struct EditProfileView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(String(localized: "save")) {
-                        Task {
-                            isLoading = true
-                            if case .loaded(let profile) = viewModel.state {
-                                let changeRequest = Auth.auth().currentUser?.createProfileChangeRequest()
-                                changeRequest?.displayName = name
-                                try? await changeRequest?.commitChanges()
-                                await viewModel.update(
-                                    name: name,
-                                    language: profile.language,
-                                    notifications: profile.notifications
-                                )
-                            }
-                            isLoading = false
-                            dismiss()
-                        }
+                        Task { await save() }
                     }
-                    .disabled(name.isEmpty || isLoading)
+                    .disabled(trimmedName.isEmpty || isSaving)
                 }
+            }
+            .alert(String(localized: "error"), isPresented: $showError) {
+                Button(String(localized: "OK"), role: .cancel) {}
+            } message: {
+                Text(String(localized: "profile_update_error"))
             }
             .onAppear {
                 if case .loaded(let profile) = viewModel.state {
@@ -55,5 +52,40 @@ struct EditProfileView: View {
                 }
             }
         }
+    }
+
+    /// Guarda primero en la API y después en Firebase. Los dos sistemas no se
+    /// pueden actualizar de forma atómica: si Firebase falla, se restaura el
+    /// nombre anterior en la API para no dejar dos nombres distintos.
+    private func save() async {
+        guard case .loaded(let profile) = viewModel.state else { return }
+        isSaving = true
+        defer { isSaving = false }
+
+        let newName = trimmedName
+        let savedInApi = await viewModel.update(
+            name: newName,
+            language: profile.language,
+            notifications: profile.notifications
+        )
+        guard savedInApi else {
+            showError = true
+            return
+        }
+
+        if await authViewModel.updateDisplayName(newName) {
+            dismiss()
+            return
+        }
+
+        let restored = await viewModel.update(
+            name: profile.name,
+            language: profile.language,
+            notifications: profile.notifications
+        )
+        if !restored {
+            AppLogger.warning("EditProfileView.save: could not restore previous name in API")
+        }
+        showError = true
     }
 }

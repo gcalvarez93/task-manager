@@ -8,7 +8,7 @@
 // Path: TaskManager/Core/Errors/Failure.swift
 import Foundation
 
-enum Failure: LocalizedError {
+enum Failure: LocalizedError, Equatable {
     case network(String)
     case server(String)
     case auth(String)
