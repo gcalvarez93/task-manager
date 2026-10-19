@@ -150,7 +150,12 @@ xcodebuild test \
 ## 🔗 Related
 
 - [CastroDev API](https://github.com/gcalvarez93/castrodev-api) — Shared .NET 10 backend
-- [castrodev.com](https://castrodev.com) — Portfolio
+
+---
+
+## 📄 License
+
+MIT © Gabriel Castro
 
 ---
 
@@ -249,3 +254,15 @@ xcodebuild test \
   -scheme TaskManager \
   -destination 'platform=iOS Simulator,name=iPhone 17'
 ```
+
+---
+
+## 🔗 Relacionado
+
+- [CastroDev API](https://github.com/gcalvarez93/castrodev-api) — Backend compartido en .NET 10
+
+---
+
+## 📄 Licencia
+
+MIT © Gabriel Castro
