@@ -1,5 +1,5 @@
 //
-//  UpdateBoardUseCase.swift.swift
+//  UpdateBoardUseCase.swift
 //  TaskManager
 //
 //  Created by Gabriel Castro on 09/06/2026.
@@ -16,6 +16,8 @@ final class UpdateBoardUseCase {
     }
 
     func execute(id: String, name: String, description: String, color: String) async throws -> BoardEntity {
-        try await repository.updateBoard(id: id, name: name, description: description, color: color)
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { throw Failure.validation(String(localized: "validation_name_empty")) }
+        return try await repository.updateBoard(id: id, name: name, description: description, color: color)
     }
 }

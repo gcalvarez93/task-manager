@@ -11,6 +11,7 @@ import SwiftUI
 struct TasksView: View {
     let board: BoardEntity
     @State private var viewModel: TasksViewModel
+    @State private var actionError: String?
 
     init(board: BoardEntity) {
         self.board = board
@@ -71,6 +72,14 @@ struct TasksView: View {
         .refreshable {
             await viewModel.loadTasks()
         }
+        .alert(String(localized: "error"), isPresented: Binding(
+            get: { actionError != nil },
+            set: { if !$0 { actionError = nil } }
+        )) {
+            Button(String(localized: "OK"), role: .cancel) {}
+        } message: {
+            Text(actionError ?? "")
+        }
         .environment(viewModel)
     }
 
@@ -100,7 +109,7 @@ struct TasksView: View {
                                         Label(String(localized: "edit"), systemImage: "pencil")
                                     }
                                     Button(role: .destructive) {
-                                        Task { await viewModel.removeTask(id: task.id) }
+                                        Task { actionError = await viewModel.removeTask(id: task.id) }
                                     } label: {
                                         Label(String(localized: "delete"), systemImage: "trash")
                                     }

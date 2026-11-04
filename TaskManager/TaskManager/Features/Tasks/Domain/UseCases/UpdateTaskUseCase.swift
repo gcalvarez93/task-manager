@@ -24,7 +24,9 @@ final class UpdateTaskUseCase {
         dueDate: Date?,
         labels: [String]
     ) async throws -> TaskEntity {
-        try await repository.updateTask(
+        let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { throw Failure.validation(String(localized: "validation_title_empty")) }
+        return try await repository.updateTask(
             id: id,
             title: title,
             description: description,

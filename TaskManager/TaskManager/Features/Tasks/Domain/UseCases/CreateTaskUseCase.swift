@@ -24,7 +24,9 @@ final class CreateTaskUseCase {
         dueDate: Date?,
         labels: [String]
     ) async throws -> TaskEntity {
-        try await repository.createTask(
+        let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { throw Failure.validation(String(localized: "validation_title_empty")) }
+        return try await repository.createTask(
             boardId: boardId,
             title: title,
             description: description,

@@ -1,5 +1,5 @@
 //
-//  CreateBoardUseCase.swift.swift
+//  CreateBoardUseCase.swift
 //  TaskManager
 //
 //  Created by Gabriel Castro on 09/06/2026.
@@ -16,6 +16,8 @@ final class CreateBoardUseCase {
     }
 
     func execute(name: String, description: String, color: String) async throws -> BoardEntity {
-        try await repository.createBoard(name: name, description: description, color: color)
+        let name = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { throw Failure.validation(String(localized: "validation_name_empty")) }
+        return try await repository.createBoard(name: name, description: description, color: color)
     }
 }

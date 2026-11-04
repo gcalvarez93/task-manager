@@ -20,8 +20,14 @@ struct AddTaskSheet: View {
     @State private var status: TaskStatus = .todo
     @State private var dueDate: Date = Date()
     @State private var hasDueDate = false
+    @State private var isSaving = false
+    @State private var errorMessage: String?
 
     private var isEditing: Bool { taskToEdit != nil }
+
+    private var trimmedTitle: String {
+        title.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     var body: some View {
         NavigationStack {
@@ -70,32 +76,18 @@ struct AddTaskSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(String(localized: "save")) {
-                        Task {
-                            if isEditing, let task = taskToEdit {
-                                await viewModel.editTask(
-                                    id: task.id,
-                                    title: title,
-                                    description: description,
-                                    priority: priority,
-                                    status: status,
-                                    dueDate: hasDueDate ? dueDate : nil,
-                                    labels: []
-                                )
-                            } else {
-                                await viewModel.addTask(
-                                    title: title,
-                                    description: description,
-                                    priority: priority,
-                                    status: status,
-                                    dueDate: hasDueDate ? dueDate : nil,
-                                    labels: []
-                                )
-                            }
-                            dismiss()
-                        }
+                        Task { await save() }
                     }
-                    .disabled(title.isEmpty)
+                    .disabled(trimmedTitle.isEmpty || isSaving)
                 }
+            }
+            .alert(String(localized: "error"), isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button(String(localized: "OK"), role: .cancel) {}
+            } message: {
+                Text(errorMessage ?? "")
             }
             .onAppear {
                 if let task = taskToEdit {
@@ -109,6 +101,41 @@ struct AddTaskSheet: View {
                     }
                 }
             }
+        }
+    }
+
+    /// Guarda y cierra la hoja solo si salió bien. Si falla, la hoja sigue abierta con lo escrito
+    /// y se avisa con una alerta.
+    private func save() async {
+        isSaving = true
+        defer { isSaving = false }
+
+        let message: String?
+        if isEditing, let task = taskToEdit {
+            message = await viewModel.editTask(
+                id: task.id,
+                title: title,
+                description: description,
+                priority: priority,
+                status: status,
+                dueDate: hasDueDate ? dueDate : nil,
+                labels: task.labels
+            )
+        } else {
+            message = await viewModel.addTask(
+                title: title,
+                description: description,
+                priority: priority,
+                status: status,
+                dueDate: hasDueDate ? dueDate : nil,
+                labels: []
+            )
+        }
+
+        if let message {
+            errorMessage = message
+        } else {
+            dismiss()
         }
     }
 }

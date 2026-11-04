@@ -1,4 +1,5 @@
 // Path: TaskManager/TaskManagerTests/ProfileViewModelTests.swift
+import Foundation
 import Testing
 @testable import TaskManager
 
@@ -21,13 +22,45 @@ struct ProfileViewModelTests {
         #expect(viewModel.state == .loaded(TestData.profile))
     }
 
-    @Test func loadProfileFailureShowsTheMessage() async {
-        repository.profileResult = .failure(.server("boom"))
+    @Test func loadProfileFailureShowsTheUserMessage() async {
+        repository.profileResult = .failure(.server("HTTP 500"))
         let viewModel = makeViewModel()
 
         await viewModel.loadProfile()
 
-        #expect(viewModel.state == .error("boom"))
+        #expect(viewModel.state == .error(Failure.server("HTTP 500").userMessage))
+    }
+
+    @Test func loadProfileFailureDoesNotExposeTheTechnicalDetail() async {
+        repository.profileResult = .failure(.server("HTTP 500"))
+        let viewModel = makeViewModel()
+
+        await viewModel.loadProfile()
+
+        guard case .error(let message) = viewModel.state else {
+            Issue.record("Expected an error state")
+            return
+        }
+        #expect(!message.contains("HTTP 500"))
+    }
+
+    @Test func aCancelledLoadDoesNotShowAnError() async {
+        repository.profileError = CancellationError()
+        let viewModel = makeViewModel()
+
+        await viewModel.loadProfile()
+
+        #expect(viewModel.state == .initial)
+    }
+
+    @Test func aCancelledReloadKeepsTheLoadedProfile() async {
+        let viewModel = makeViewModel()
+        await viewModel.loadProfile()
+        repository.profileError = CancellationError()
+
+        await viewModel.loadProfile()
+
+        #expect(viewModel.state == .loaded(TestData.profile))
     }
 
     @Test func updateReturnsTrueAndPublishesTheSavedProfile() async {
@@ -49,7 +82,7 @@ struct ProfileViewModelTests {
     @Test func failedUpdateReturnsFalseAndKeepsThePreviousProfile() async {
         let viewModel = makeViewModel()
         await viewModel.loadProfile()
-        repository.updateResult = .failure(.server("boom"))
+        repository.updateResult = .failure(.server("HTTP 500"))
 
         let saved = await viewModel.update(name: "Nuevo nombre", language: "en", notifications: false)
 

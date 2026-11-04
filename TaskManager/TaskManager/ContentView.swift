@@ -15,11 +15,13 @@ struct ContentView: View {
     var body: some View {
         Group {
             switch authViewModel.state {
-            case .initial, .loading:
+            case .initial:
                 ProgressView()
             case .authenticated:
                 HomeView()
-            case .unauthenticated, .error:
+            case .loading, .unauthenticated, .error:
+                // `.loading` mantiene el login en pantalla: si se sustituyera por un spinner,
+                // se perderían los campos escritos y el aviso de error no llegaría a verse.
                 LoginView()
             }
         }

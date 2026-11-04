@@ -34,13 +34,22 @@ final class ProfileViewModel {
     }
 
     func loadProfile() async {
+        let previous = state
         state = .loading
         do {
             let profile = try await getProfile.execute()
             state = .loaded(profile)
         } catch {
+            if error.isCancellation {
+                if case .loading = previous {
+                    state = .initial
+                } else {
+                    state = previous
+                }
+                return
+            }
             AppLogger.error("ProfileViewModel.loadProfile", error)
-            state = .error(error.localizedDescription)
+            state = .error(error.userFacingMessage)
         }
     }
 

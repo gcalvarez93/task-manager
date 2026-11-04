@@ -46,16 +46,25 @@ final class TasksViewModel {
     var boardColor: String { board.color }
 
     func loadTasks() async {
+        let previous = state
         state = .loading
         do {
             let tasks = try await getTasks.execute(boardId: board.id)
             state = .loaded(tasks)
         } catch {
+            if error.isCancellation {
+                restoreAfterCancellation(previous)
+                return
+            }
             AppLogger.error("TasksViewModel.loadTasks", error)
-            state = .error(error.localizedDescription)
+            state = .error(error.userFacingMessage)
         }
     }
 
+    // Las operaciones de escritura devuelven `nil` si salieron bien o el mensaje para el usuario
+    // si fallaron. Un fallo no sustituye la lista ya cargada: la pantalla decide cómo avisar.
+
+    @discardableResult
     func addTask(
         title: String,
         description: String,
@@ -63,7 +72,7 @@ final class TasksViewModel {
         status: TaskStatus,
         dueDate: Date?,
         labels: [String]
-    ) async {
+    ) async -> String? {
         do {
             _ = try await createTask.execute(
                 boardId: board.id,
@@ -74,13 +83,14 @@ final class TasksViewModel {
                 dueDate: dueDate,
                 labels: labels
             )
-            await loadTasks()
         } catch {
-            AppLogger.error("TasksViewModel.addTask", error)
-            state = .error(error.localizedDescription)
+            return failureMessage(for: error, context: "TasksViewModel.addTask")
         }
+        await loadTasks()
+        return nil
     }
 
+    @discardableResult
     func editTask(
         id: String,
         title: String,
@@ -89,7 +99,7 @@ final class TasksViewModel {
         status: TaskStatus,
         dueDate: Date?,
         labels: [String]
-    ) async {
+    ) async -> String? {
         do {
             _ = try await updateTask.execute(
                 id: id,
@@ -100,25 +110,41 @@ final class TasksViewModel {
                 dueDate: dueDate,
                 labels: labels
             )
-            await loadTasks()
         } catch {
-            AppLogger.error("TasksViewModel.editTask", error)
-            state = .error(error.localizedDescription)
+            return failureMessage(for: error, context: "TasksViewModel.editTask")
         }
+        await loadTasks()
+        return nil
     }
 
-    func removeTask(id: String) async {
+    @discardableResult
+    func removeTask(id: String) async -> String? {
         do {
             try await deleteTask.execute(id: id)
-            await loadTasks()
         } catch {
-            AppLogger.error("TasksViewModel.removeTask", error)
-            state = .error(error.localizedDescription)
+            return failureMessage(for: error, context: "TasksViewModel.removeTask")
         }
+        await loadTasks()
+        return nil
     }
 
     func tasksByStatus(_ status: TaskStatus) -> [TaskEntity] {
         guard case .loaded(let tasks) = state else { return [] }
         return tasks.filter { $0.status == status }
+    }
+
+    /// Registra el fallo y devuelve el mensaje para el usuario. Una cancelación no es un fallo: `nil`.
+    private func failureMessage(for error: Error, context: String) -> String? {
+        if error.isCancellation { return nil }
+        AppLogger.error(context, error)
+        return error.userFacingMessage
+    }
+
+    private func restoreAfterCancellation(_ previous: TasksState) {
+        if case .loading = previous {
+            state = .initial
+        } else {
+            state = previous
+        }
     }
 }

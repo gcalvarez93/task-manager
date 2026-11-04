@@ -10,6 +10,7 @@ import SwiftUI
 
 struct BoardsView: View {
     @State private var viewModel = BoardsViewModel()
+    @State private var actionError: String?
     @Environment(AuthViewModel.self) private var authViewModel
 
     private let columns = [
@@ -67,6 +68,14 @@ struct BoardsView: View {
             .refreshable {
                 await viewModel.loadBoards()
             }
+            .alert(String(localized: "error"), isPresented: Binding(
+                get: { actionError != nil },
+                set: { if !$0 { actionError = nil } }
+            )) {
+                Button(String(localized: "OK"), role: .cancel) {}
+            } message: {
+                Text(actionError ?? "")
+            }
         }
         .environment(viewModel)
     }
@@ -96,7 +105,7 @@ struct BoardsView: View {
                             Label(String(localized: "edit"), systemImage: "pencil")
                         }
                         Button(role: .destructive) {
-                            Task { await viewModel.removeBoard(id: board.id) }
+                            Task { actionError = await viewModel.removeBoard(id: board.id) }
                         } label: {
                             Label(String(localized: "delete"), systemImage: "trash")
                         }

@@ -17,6 +17,8 @@ struct AddBoardSheet: View {
     @State private var name = ""
     @State private var description = ""
     @State private var selectedColor = "#3B82F6"
+    @State private var isSaving = false
+    @State private var errorMessage: String?
 
     private let colors = [
         "#3B82F6", "#8B5CF6", "#10B981", "#F59E0B",
@@ -24,6 +26,10 @@ struct AddBoardSheet: View {
     ]
 
     private var isEditing: Bool { boardToEdit != nil }
+
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     var body: some View {
         NavigationStack {
@@ -58,26 +64,18 @@ struct AddBoardSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(String(localized: "save")) {
-                        Task {
-                            if isEditing, let board = boardToEdit {
-                                await viewModel.editBoard(
-                                    id: board.id,
-                                    name: name,
-                                    description: description,
-                                    color: selectedColor
-                                )
-                            } else {
-                                await viewModel.addBoard(
-                                    name: name,
-                                    description: description,
-                                    color: selectedColor
-                                )
-                            }
-                            dismiss()
-                        }
+                        Task { await save() }
                     }
-                    .disabled(name.isEmpty)
+                    .disabled(trimmedName.isEmpty || isSaving)
                 }
+            }
+            .alert(String(localized: "error"), isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button(String(localized: "OK"), role: .cancel) {}
+            } message: {
+                Text(errorMessage ?? "")
             }
             .onAppear {
                 if let board = boardToEdit {
@@ -86,6 +84,35 @@ struct AddBoardSheet: View {
                     selectedColor = board.color
                 }
             }
+        }
+    }
+
+    /// Guarda y cierra la hoja solo si salió bien. Si falla, la hoja sigue abierta con lo escrito
+    /// y se avisa con una alerta.
+    private func save() async {
+        isSaving = true
+        defer { isSaving = false }
+
+        let message: String?
+        if isEditing, let board = boardToEdit {
+            message = await viewModel.editBoard(
+                id: board.id,
+                name: name,
+                description: description,
+                color: selectedColor
+            )
+        } else {
+            message = await viewModel.addBoard(
+                name: name,
+                description: description,
+                color: selectedColor
+            )
+        }
+
+        if let message {
+            errorMessage = message
+        } else {
+            dismiss()
         }
     }
 }

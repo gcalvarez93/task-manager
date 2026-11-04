@@ -40,43 +40,69 @@ final class BoardsViewModel {
     }
 
     func loadBoards() async {
+        let previous = state
         state = .loading
         do {
             let boards = try await getBoards.execute()
             state = .loaded(boards)
         } catch {
+            if error.isCancellation {
+                restoreAfterCancellation(previous)
+                return
+            }
             AppLogger.error("BoardsViewModel.loadBoards", error)
-            state = .error(error.localizedDescription)
+            state = .error(error.userFacingMessage)
         }
     }
 
-    func addBoard(name: String, description: String, color: String) async {
+    // Las operaciones de escritura devuelven `nil` si salieron bien o el mensaje para el usuario
+    // si fallaron. Un fallo no sustituye la lista ya cargada: la pantalla decide cómo avisar.
+
+    @discardableResult
+    func addBoard(name: String, description: String, color: String) async -> String? {
         do {
             _ = try await createBoard.execute(name: name, description: description, color: color)
-            await loadBoards()
         } catch {
-            AppLogger.error("BoardsViewModel.addBoard", error)
-            state = .error(error.localizedDescription)
+            return failureMessage(for: error, context: "BoardsViewModel.addBoard")
         }
+        await loadBoards()
+        return nil
     }
 
-    func editBoard(id: String, name: String, description: String, color: String) async {
+    @discardableResult
+    func editBoard(id: String, name: String, description: String, color: String) async -> String? {
         do {
             _ = try await updateBoard.execute(id: id, name: name, description: description, color: color)
-            await loadBoards()
         } catch {
-            AppLogger.error("BoardsViewModel.editBoard", error)
-            state = .error(error.localizedDescription)
+            return failureMessage(for: error, context: "BoardsViewModel.editBoard")
         }
+        await loadBoards()
+        return nil
     }
 
-    func removeBoard(id: String) async {
+    @discardableResult
+    func removeBoard(id: String) async -> String? {
         do {
             try await deleteBoard.execute(id: id)
-            await loadBoards()
         } catch {
-            AppLogger.error("BoardsViewModel.removeBoard", error)
-            state = .error(error.localizedDescription)
+            return failureMessage(for: error, context: "BoardsViewModel.removeBoard")
+        }
+        await loadBoards()
+        return nil
+    }
+
+    /// Registra el fallo y devuelve el mensaje para el usuario. Una cancelación no es un fallo: `nil`.
+    private func failureMessage(for error: Error, context: String) -> String? {
+        if error.isCancellation { return nil }
+        AppLogger.error(context, error)
+        return error.userFacingMessage
+    }
+
+    private func restoreAfterCancellation(_ previous: BoardsState) {
+        if case .loading = previous {
+            state = .initial
+        } else {
+            state = previous
         }
     }
 }

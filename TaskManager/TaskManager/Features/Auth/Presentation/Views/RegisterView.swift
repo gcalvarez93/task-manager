@@ -17,6 +17,11 @@ struct RegisterView: View {
     @State private var showError = false
     @State private var errorMessage = ""
 
+    private var isBusy: Bool {
+        if case .loading = viewModel.state { return true }
+        return false
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
@@ -49,7 +54,7 @@ struct RegisterView: View {
                     }
                 } label: {
                     Group {
-                        if case .loading = viewModel.state {
+                        if isBusy {
                             ProgressView().tint(.white)
                         } else {
                             Text(String(localized: "register"))
@@ -62,7 +67,7 @@ struct RegisterView: View {
                     .background(.blue)
                     .cornerRadius(12)
                 }
-                .disabled(name.isEmpty || email.isEmpty || password.isEmpty)
+                .disabled(name.isEmpty || email.isEmpty || password.isEmpty || isBusy)
 
                 HStack {
                     Rectangle().frame(height: 1).foregroundStyle(Color(.systemGray4))
@@ -73,6 +78,7 @@ struct RegisterView: View {
                 GoogleSignInButton {
                     Task { await viewModel.signInWithGoogle() }
                 }
+                .disabled(isBusy)
             }
             .padding(.horizontal, 24)
         }

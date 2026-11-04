@@ -18,6 +18,12 @@ final class FirebaseTokenProvider: TokenProviderProtocol {
         guard let user = Auth.auth().currentUser else {
             throw Failure.auth("No authenticated user")
         }
-        return try await user.getIDToken()
+        do {
+            return try await user.getIDToken()
+        } catch {
+            // Sin red, Firebase falla al renovar el token: se traduce para que el usuario
+            // vea "sin conexión" y no un error genérico.
+            throw FirebaseAuthErrorMapper.map(error)
+        }
     }
 }
