@@ -101,6 +101,15 @@ Feature/
 - **Shared .NET 10 API.** Business rules live on the server; the app sends the Firebase ID token. One backend serves all the apps in this portfolio.
 - **Tests with Swift Testing and hand-written fakes.** ViewModels, repository mappings, the network client, the Firebase error mapper and the user-facing messages are covered with fakes of the domain protocols, with no mocking library. The alerts and sheets themselves are not covered by automated UI tests.
 
+### Known limitations
+
+Deliberate technical debt, documented rather than hidden:
+
+- **Expired session.** The network client treats every non-2xx response as a generic server error: a 401 is not told apart from a 500, and the app does not sign the user out or retry on its own. Firebase renews the ID token when the app asks for it, so the case is rare, but a server-side 401 ends in an error alert. Timeouts are the `URLSession` defaults rather than explicit values.
+- **Profile name across two systems.** The name is saved in the API first and then in Firebase; if the Firebase step fails, the app restores the previous name in the API. If that restore also fails, it is only logged, so the two names could differ until the next successful edit.
+- **No automated UI tests.** Alerts and sheets are checked by hand; the automated tests cover ViewModels, repositories, the network client and the user-facing messages.
+- **No DI container.** Dependencies are wired with default arguments in each ViewModel initialiser. That is simple at this size; if the project grew, a container would centralise the wiring.
+
 ### Other projects in this portfolio
 
 | Project | Platform | Language |
@@ -215,6 +224,15 @@ App de gestión de tareas por tableros. Organiza tu trabajo en tableros personal
 - **App Transport Security activado.** La única excepción es la red local, para desarrollar contra `localhost`.
 - **API compartida en .NET 10.** Las reglas de negocio viven en el servidor; la app envía el token de Firebase. Un solo backend sirve a todas las apps de este portfolio.
 - **Tests con Swift Testing y fakes escritos a mano.** Los ViewModels, los mapeos de repositorios, el cliente de red, el traductor de errores de Firebase y los mensajes para el usuario están cubiertos con fakes de los protocolos del dominio, sin librería de mocks. Las alertas y las hojas en sí no tienen tests de UI automáticos.
+
+### Limitaciones conocidas
+
+Deuda técnica asumida a propósito, documentada en lugar de ocultada:
+
+- **Sesión caducada.** El cliente de red trata cualquier respuesta no 2xx como un error genérico de servidor: un 401 no se distingue de un 500, y la app no cierra la sesión ni reintenta por sí sola. Firebase renueva el token de ID cuando la app lo pide, así que el caso es raro, pero un 401 del servidor acaba en una alerta de error. Los timeouts son los de `URLSession` por defecto, no valores explícitos.
+- **Nombre de perfil en dos sistemas.** El nombre se guarda primero en la API y luego en Firebase; si falla el paso de Firebase, la app restaura el nombre anterior en la API. Si esa restauración también falla, solo se registra en el log, así que los dos nombres podrían diferir hasta la próxima edición correcta.
+- **Sin tests de UI automáticos.** Las alertas y las hojas se comprueban a mano; los tests automáticos cubren ViewModels, repositorios, el cliente de red y los mensajes para el usuario.
+- **Sin contenedor de DI.** Las dependencias se enlazan con argumentos por defecto en el inicializador de cada ViewModel. Es sencillo a este tamaño; si el proyecto creciera, un contenedor centralizaría el enlazado.
 
 ### Otros proyectos del portfolio
 
