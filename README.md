@@ -107,8 +107,11 @@ Deliberate technical debt, documented rather than hidden:
 
 - **Expired session.** The network client treats every non-2xx response as a generic server error: a 401 is not told apart from a 500, and the app does not sign the user out or retry on its own. Firebase renews the ID token when the app asks for it, so the case is rare, but a server-side 401 ends in an error alert. Timeouts are the `URLSession` defaults rather than explicit values.
 - **Profile name across two systems.** The name is saved in the API first and then in Firebase; if the Firebase step fails, the app restores the previous name in the API. If that restore also fails, it is only logged, so the two names could differ until the next successful edit.
-- **No automated UI tests.** Alerts and sheets are checked by hand; the automated tests cover ViewModels, repositories, the network client and the user-facing messages.
+- **No automated UI tests.** Alerts and sheets are checked by hand; the automated tests cover ViewModels, the auth and task repositories, the network client and the user-facing messages. The board and profile repositories have no dedicated tests.
 - **No DI container.** Dependencies are wired with default arguments in each ViewModel initialiser. That is simple at this size; if the project grew, a container would centralise the wiring.
+- **Lists are reloaded through the global loading state.** After a successful create, edit or delete the list is reloaded and, while it loads, replaced by a spinner. If that reload fails, the full-screen error replaces the list even though the write succeeded. A failed write on its own does keep the list, as described above.
+- **No retry button on load errors.** The full-screen error state only shows the message.
+- **Shared code is copied, not shared.** `NetworkClient`, `Failure` and `FirebaseAuthErrorMapper` also exist in budget-scanner; there is no shared Swift package, so a fix has to be applied in both.
 
 ### Other projects in this portfolio
 
@@ -231,8 +234,11 @@ Deuda técnica asumida a propósito, documentada en lugar de ocultada:
 
 - **Sesión caducada.** El cliente de red trata cualquier respuesta no 2xx como un error genérico de servidor: un 401 no se distingue de un 500, y la app no cierra la sesión ni reintenta por sí sola. Firebase renueva el token de ID cuando la app lo pide, así que el caso es raro, pero un 401 del servidor acaba en una alerta de error. Los timeouts son los de `URLSession` por defecto, no valores explícitos.
 - **Nombre de perfil en dos sistemas.** El nombre se guarda primero en la API y luego en Firebase; si falla el paso de Firebase, la app restaura el nombre anterior en la API. Si esa restauración también falla, solo se registra en el log, así que los dos nombres podrían diferir hasta la próxima edición correcta.
-- **Sin tests de UI automáticos.** Las alertas y las hojas se comprueban a mano; los tests automáticos cubren ViewModels, repositorios, el cliente de red y los mensajes para el usuario.
+- **Sin tests de UI automáticos.** Las alertas y las hojas se comprueban a mano; los tests automáticos cubren ViewModels, los repositorios de auth y de tareas, el cliente de red y los mensajes para el usuario. Los repositorios de tableros y de perfil no tienen tests propios.
 - **Sin contenedor de DI.** Las dependencias se enlazan con argumentos por defecto en el inicializador de cada ViewModel. Es sencillo a este tamaño; si el proyecto creciera, un contenedor centralizaría el enlazado.
+- **Las listas se recargan con el estado de carga global.** Tras crear, editar o borrar con éxito se recarga la lista y, mientras carga, se sustituye por un indicador de carga. Si esa recarga falla, el error a pantalla completa reemplaza la lista aunque la escritura haya salido bien. Una escritura fallida por sí sola sí conserva la lista, como se describe arriba.
+- **Sin botón de reintento en los errores de carga.** El estado de error a pantalla completa solo muestra el mensaje.
+- **Código compartido copiado, no compartido.** `NetworkClient`, `Failure` y `FirebaseAuthErrorMapper` existen también en budget-scanner; no hay un paquete Swift común, así que una corrección hay que aplicarla en los dos.
 
 ### Otros proyectos del portfolio
 
